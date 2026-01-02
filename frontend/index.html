@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Email Sender</title>
+
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            color: #bbbbbb;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #1a1a1a;
+            padding: 20px;
+            width: 380px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.2);
+
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #ffb74d;
+            font-weight: bold;
+        }
+
+        small {
+            color: #aaaaaa;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            color: #ffffff;
+        }
+
+        button {
+            background-color: #ff9800;
+            color: #000;
+            border: none;
+            padding: 12px 22px;
+            font-size: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #e68900;
+        }
+
+        table {
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 65%;
+            background-color: #1a1a1a;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ff9800;
+            color: #000;
+        }
+
+        tr:nth-child(even) {
+            background-color: #222;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #1a1a1a;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Automatic Email Sender</h1>
+    <p class="subtitle">
+        Upload an Excel file containing recipient email IDs and a PDF file to be sent as an attachment.
+    </p>
+
+    <form id="uploadForm">
+
+        <label> Upload Excel File (Email List)</label>
+        <small>
+            The Excel file must contain a column named <b>emails</b>
+        </small>
+        <input type="file" name="excel" accept=".xlsx" required />
+
+        <label> Upload PDF File (Email Attachment)</label>
+        <small>
+            This PDF will be attached and sent to all recipients
+        </small>
+        <input type="file" name="pdf" accept=".pdf" required />
+
+        <button type="submit">Send Emails</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Email Address</th>
+            <th>Status</th>
+        </tr>
+        <tbody id="data"></tbody>
+    </table>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch("http://localhost:5000/send-emails", {
+                method: "POST",
+                body: formData
+            });
+        });
+
+        setInterval(() => {
+            fetch("http://localhost:5000/status")
+                .then(res => res.json())
+                .then(data => {
+                    let rows = "";
+                    data.forEach(d => {
+                        rows += `<tr><td>${d.email}</td><td>${d.status}</td></tr>`;
+                    });
+                    document.getElementById("data").innerHTML = rows;
+                });
+        }, 2000);
+    </script>
+
+</body>
+
+</html>
